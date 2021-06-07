@@ -35,5 +35,8 @@ export const { addToBasket, removeFromBasket } = basketSlice.actions;
 
 // Selectors - This is how we pull information from the Global store slice
 export const selectItems = (state) => state.basket.items;
+//計算購物車裡的總價錢
+//reduce() 為陣列疊加函式，total是累加器，而我們可以設定0為初始值 
+export const seletorTotal = (state) => state.basket.items.reduce((total, item) => total + item.price, 0);
 
 export default basketSlice.reducer;
