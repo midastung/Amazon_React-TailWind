@@ -12,7 +12,7 @@ import { selectItems } from "../slices/basketSlice";
 function Header() {
     const [session] = useSession();
     const router = useRouter();
-    //selector能夠從redux裏抓值
+    //selector能夠從redux(global s)裏抓值
     const items = useSelector(selectItems);
     return (
         <header>
