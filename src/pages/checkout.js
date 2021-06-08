@@ -4,16 +4,37 @@ import Currency from "react-currency-formatter";
 import { useSelector } from "react-redux";
 import ChekoutProduct from "../components/ChekoutProduct";
 import Header from "../components/Header";
-import { selectItems, seletorTotal } from "../slices/basketSlice";
+import { selectItems, selectTotal } from "../slices/basketSlice";
+import { loadStripe } from "@stripe/stripe-js"
+import axios  from "axios";
+
+const stripePromise = loadStripe(process.env.stripe_public_key);
 
 function Checkout() {
     const [session] = useSession();
     const items = useSelector(selectItems);
-    const total = useSelector(seletorTotal);
+    const total = useSelector(selectTotal);
+
+    const createCheckoutSession = async () => {
+        const stripe = await stripePromise;
+
+        //Call the backend to create a checkout session...
+        const checkoutSeesion = await axios.post('/api/create-checkout-session', {
+            items: items,
+            email: session.user.email,
+        });
+
+        // Redirect user/customer to Stripe Checkout
+        const result = await stripe.redirectToCheckout({
+            sessionId: checkoutSeesion.data.id
+        })
+
+        // if(result.error) alret(result.error.message);
+    }
+
     return (
         <div className="bg-gray-100">
             <Header />
-
             <main className="lg:flex max-w-screen-2xl mx-auto">
                 {/* left */}
                 <div className="flex-grow m-5 shadow-sm">
@@ -57,7 +78,10 @@ function Checkout() {
                                 </span>
                             </h2>
 
-                            <button disabled={!session}
+                            <button 
+                                role="link" 
+                                onClick={createCheckoutSession}
+                                disabled={!session}
                                 className={`button mt-2 ${!session
                                 && "from-gray-300 to-gray-500 border-gray-200 text-gray-300 cursor-not-allowed"
                                 }`}>
